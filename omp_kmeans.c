@@ -242,10 +242,10 @@ int main(int argc, char *argv[]){
 
     end_time = omp_get_wtime();
     writing_time = (end_time - start_time)*1000;
-    printf("Initialization time: %f milliseconds\n", init_time);
+    // printf("Initialization time: %f milliseconds\n", init_time);
     printf("Algorithm time: %f milliseconds\n", algorithm_time);
-    printf("Writing time: %f milliseconds\n", writing_time);
-    printf("Time taken: %f milliseconds\n", init_time+algorithm_time+writing_time);
+    // printf("Writing time: %f milliseconds\n", writing_time);
+    // printf("Time taken: %f milliseconds\n", init_time+algorithm_time+writing_time);
     return 0;
 }
 

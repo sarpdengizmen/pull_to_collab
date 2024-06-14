@@ -9,14 +9,17 @@ lloyd algorithm for updating the centroids.
 #include <time.h>
 #include <string.h>
 
+clock_t start, init, end, algorithm;
+double cpu_time_used, init_time, algorithm_time, writing_time;
+
 int getMinIndex(double arr[], int n);
-double average(double arr[], int n);
 int someExceedsTol(double arr[], int n, double tol);
 
 
 int main(int argc, char *argv[]){
     /* Function takes two arguments first is the input file name 
     second is the data file name*/
+    start = clock();
     
     FILE *input_file = fopen(argv[1], "r");
 
@@ -61,13 +64,48 @@ int main(int argc, char *argv[]){
     double centroids[clusters][dimensions]; // Array to store the centroids
    
     
-    // Initialize the centroids randomly from the data points
+/*     // Initialize the centroids randomly from the data points
     srand(time(0)); // Seed the random number generator with time
     for (int i = 0; i < clusters; i++){
         int random = rand() % datapoints;
         for (int j = 0; j < dimensions; j++){
             centroids[i][j] = points[random][j];
         }
+    } */
+
+    // First centroid is chosen randomly
+    srand(time(0)); // Seed the random number generator with time
+    int random = rand() % datapoints;
+    for (int j = 0; j < dimensions; j++){
+            centroids[0][j] = points[random][j];
+    }
+    for (int i = 1; i < clusters; i++){ // For the rest of the centroids
+        // Compute distances of all points to all centroids
+        double* distances = calloc(datapoints, sizeof(double));
+        for (int j = 0; j < datapoints; j++){ // For each point
+            double min_distance = 1000000000;
+            for (int k = 0; k < i; k++){ // For each already chosen centroid
+                double distance = 0;
+                for (int l = 0; l < dimensions; l++){
+                    distance += pow(points[j][l] - centroids[k][l], 2); // Calculate the distance of the point to the centroid
+                }
+                if (distance < min_distance){
+                    min_distance = distance;
+                }
+            }
+            distances[j] = min_distance; // Stores the minimum distance of the point to the already chosen centroids
+        }
+        // Choose the next centroid which is the point with the maximum minimum distance
+        int max_index = 0;  
+        for (int j = 1; j < datapoints; j++){
+            if (distances[j] > distances[max_index]){
+                max_index = j;
+            }
+        }
+        for (int j = 0; j < dimensions; j++){
+            centroids[i][j] = points[max_index][j];
+        }
+        free(distances);
     }
 
     
@@ -78,6 +116,8 @@ int main(int argc, char *argv[]){
 
     int cluster_assignment[datapoints];
     double distance[clusters];    
+
+    init = clock();
 
     while (someExceedsTol(d_centroid, clusters, tolerance)==1){
         // Assign each data point to a cluster
@@ -123,6 +163,7 @@ int main(int argc, char *argv[]){
             }
         }
     }
+    algorithm = clock();
     int cluster_count[clusters];
     // Print the final centroids
     for (int i = 0; i < clusters; i++){
@@ -142,7 +183,7 @@ int main(int argc, char *argv[]){
     // Create output file and write the cluster assignments
     FILE *output_file = fopen("output.dat", "w");
     for (int i = 0; i < datapoints; i++){
-        fprintf(output_file, "%d ", cluster_assignment[i]);
+        fprintf(output_file, "%d %d ", i, cluster_assignment[i]);
         for (int j = 0; j < dimensions; j++){
             fprintf(output_file, "%.5lf ", points[i][j]);
         }
@@ -159,7 +200,9 @@ int main(int argc, char *argv[]){
         fprintf(centroids_file, "\n");
     }
     fclose(centroids_file); // Close the file
-
+    end = clock();
+    algorithm_time = ((double) (algorithm - init)) / CLOCKS_PER_SEC * 1000;
+    printf("Algorithm time: %f milliseconds\n", algorithm_time);
     return 0;
 }
 
