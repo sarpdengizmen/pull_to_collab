@@ -202,7 +202,7 @@ int main(int argc, char *argv[]){
     fclose(centroids_file); // Close the file
     end = clock();
     algorithm_time = ((double) (algorithm - init)) / CLOCKS_PER_SEC * 1000;
-    printf("Algorithm time: %f milliseconds\n", algorithm_time);
+    printf("Algorithm time: %f \n", algorithm_time);
     return 0;
 }
 
